@@ -20,6 +20,7 @@ class _DetailState extends State<Detail> {
   late TextEditingController _phoneNumberController;
   late TextEditingController _schoolYearController;
   late TextEditingController _genderController;
+  late TextEditingController _birthDayController;
 
   @override
   void initState() {
@@ -30,6 +31,7 @@ class _DetailState extends State<Detail> {
     _phoneNumberController = TextEditingController();
     _schoolYearController = TextEditingController();
     _genderController = TextEditingController();
+    _birthDayController = TextEditingController();
     getDataUser();
   }
 
@@ -40,6 +42,7 @@ class _DetailState extends State<Detail> {
     _phoneNumberController.dispose();
     _schoolYearController.dispose();
     _genderController.dispose();
+    _birthDayController.dispose();
     super.dispose();
   }
 
@@ -56,8 +59,31 @@ class _DetailState extends State<Detail> {
         _phoneNumberController = TextEditingController(text: user.phoneNumber);
         _schoolYearController = TextEditingController(text: user.schoolYear);
         _genderController = TextEditingController(text: user.gender);
+        _birthDayController = TextEditingController(text: user.birthDay);
       });
     }
+  }
+  _saveUserData() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    user = User(
+      idNumber: _idNumberController.text,
+      accountId: user.accountId,
+      fullName: _fullNameController.text,
+      phoneNumber: _phoneNumberController.text,
+      imageURL: user.imageURL,
+      birthDay: _birthDayController.text,
+      gender: _genderController.text,
+      schoolYear: _schoolYearController.text,
+      schoolKey: user.schoolKey,
+      dateCreated: user.dateCreated,
+      status: user.status,
+    );
+    String strUser = jsonEncode(user.toJson());
+    await pref.setString('user', strUser);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('User data saved successfully')),
+    );
   }
 
   @override
@@ -114,9 +140,9 @@ class _DetailState extends State<Detail> {
               children: <Widget>[
                 Expanded(
                   child: TextFormField(
-                    controller: _schoolYearController,
+                    controller: _birthDayController,
                     decoration: const InputDecoration(
-                      labelText: 'School Year',
+                      labelText: 'Birth Day',
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -135,11 +161,16 @@ class _DetailState extends State<Detail> {
             ),
             const SizedBox(height: 16),
             TextFormField(
-              initialValue: user.gender,
+              controller: _schoolYearController,
               decoration: const InputDecoration(
-                labelText: 'Gender',
+                labelText: 'School Year',
                 border: OutlineInputBorder(),
               ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _saveUserData,
+              child: const Text('Save'),
             ),
           ],
         ),
